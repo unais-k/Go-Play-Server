@@ -5,7 +5,7 @@ import {
     GetConversationListResApi,
     GetConversationResApi,
     NewConversationReqApi,
-} from "../../Controller/Conversation/conversationController.js";
+} from "../../Controller/Conversation/ConversationController.js";
 import { ChatVerificationToken } from "../../Middleware/AuthVerify.js";
 const router = express.Router();
 
