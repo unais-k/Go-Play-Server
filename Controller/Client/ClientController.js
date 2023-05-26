@@ -31,7 +31,7 @@ export const TimeSlotResApi = async (req, res, next) => {
 
 export const GroundListResApi = async (req, res, next) => {
     try {
-        const GroundList = await GroundModel.find({});
+        const GroundList = await GroundModel.find({ nearCity: req.query.place });
         res.status(200).json({ result: GroundList });
     } catch (error) {
         console.log(error);
@@ -147,8 +147,6 @@ export const EventFetchOnSelectResApi = async (req, res, next) => {
 export const OnDateBookedResApi = async (req, res, next) => {
     try {
         const date = new Date(req.query.date);
-        console.log(req.query.date);
-        console.log(req.body);
         const isoDate = date.toISOString().split("T")[0];
         const selectedTime = [];
         const find = await bookingModel.find({ event: req.query.id, bookDate: isoDate });
@@ -157,8 +155,6 @@ export const OnDateBookedResApi = async (req, res, next) => {
             selectedTime.push(find[i].time);
         }
         const combinedArray = selectedTime.reduce((acc, curr) => acc.concat(curr), []);
-        console.log(combinedArray);
-
         res.status(201).json({ result: find, time: combinedArray });
     } catch (error) {
         console.log(error);
@@ -169,18 +165,20 @@ export const OnDateBookedResApi = async (req, res, next) => {
 export const BookingSubmitResApi = async (req, res, next) => {
     try {
         const dateString = req.body.date;
+        console.log(req.body);
         const dateObject = moment.utc(dateString).add(1, "days");
         const formattedISOString = dateObject.toISOString();
 
         const date = new Date(formattedISOString);
         const formattedDate = date.toISOString().split("T")[0];
-
+        const advance = parseInt(req.body.advance);
+        const total = parseInt(req.body.total);
         const { bookingData } = req.body;
         const booking = await bookingModel.create({
             client: req.user.id,
-            total: req.body.total[0],
+            total: total,
             paymentId: req.body.bookingId,
-            advance: req.body.advance[0],
+            advance: advance,
             bookDate: formattedDate,
             sport: bookingData[0].sport,
             bookingStatus: true,
@@ -295,12 +293,18 @@ export const SubmitReviewResApi = async (req, res, next) => {
             client: req.user.id,
             review: text,
         });
+
         const reviewStatusChangeInBookingModel = await bookingModel.updateOne(
             { _id: req.body.id },
             { $set: { review: true } }
         );
 
         const avgRating = await reviewModel.aggregate([
+            {
+                $match: {
+                    turf: groundId,
+                },
+            },
             {
                 $group: {
                     _id: null,
@@ -310,7 +314,7 @@ export const SubmitReviewResApi = async (req, res, next) => {
         ]);
         const rate = avgRating[0].average.toFixed(1);
         console.log(rate);
-        // const addingRating = await GroundModel.findOneAndUpdate({ _id: groundId }, { $set: { rating: rate } });
+        const addingRating = await GroundModel.findOneAndUpdate({ _id: groundId }, { $set: { rating: rate } });
 
         const reviewAdd = await GroundModel.findOneAndUpdate({ _id: groundId }, { $push: { reviews: setReview._id } });
         const find = await reviewModel.find({ turf: req.body.id }).populate("client");
@@ -324,28 +328,28 @@ export const SubmitReviewResApi = async (req, res, next) => {
 
 export const SearchGroundResApi = async (req, res, next) => {
     try {
-        const { id } = req.query;
+        const { id, place } = req.query;
         console.log(req.query);
-        console.log(req.body);
         let regexp = new RegExp(`^${id}`, "i");
         const find = await GroundModel.aggregate([
             {
                 $match: {
                     $or: [
                         {
-                            nearCity: regexp,
+                            address: regexp,
                         },
                         {
-                            address: regexp,
+                            name: regexp,
                         },
                         {
                             place: regexp,
                         },
                     ],
+                    nearCity: { $in: [req.query.place] },
                 },
             },
         ]);
-
+        console.log(find, "find");
         res.status(201).json({ result: find });
     } catch (error) {
         console.log(error.message);

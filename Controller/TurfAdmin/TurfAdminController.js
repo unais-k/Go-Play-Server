@@ -73,7 +73,7 @@ export const GroundViewResApi = async (req, res, next) => {
     try {
         const id = req.query.id;
         const find = await GroundModel.findOne({ _id: id }).populate("Owner");
-
+        console.log(find);
         const events = await eventModel.find({ groundId: id });
         res.status(201).json({ result: find, event: events });
     } catch (error) {
@@ -391,7 +391,7 @@ export const PaymentStatusSetResApi = async (req, res, next) => {
     try {
         console.log(req.body);
         const find = await bookingModel
-            .findOneAndUpdate({ _id: req.body.id }, { $set: { payment: req.body.value } })
+            .findOneAndUpdate({ _id: req.body.id }, { $set: { payment: req.body.value, status: req.body.value } })
             .populate("turf")
             .populate("event")
             .populate("client");
@@ -588,13 +588,14 @@ export const SubmitBookingAdminResApi = async (req, res, next) => {
             phone: phone,
             bookDate: formattedDate,
             sport: sport,
+            advance: "Nil",
             bookingType: "Admin",
             status: "Pending",
             event: eventId,
             turf: groundId,
             time: req.body.time[0],
         });
-        console.log(booking, "booking");
+
         res.status(201).json({ result: booking });
     } catch (error) {
         console.log(error);
@@ -609,5 +610,119 @@ export const AdminHomePageResApi = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: error });
+    }
+};
+
+export const barGraph = async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        const groundId = [];
+        const userId = [];
+        const ground = await GroundModel.find({ Owner: id });
+        for (let i = 0; i < ground.length; i++) {
+            groundId.push(ground[i]._id);
+        }
+
+        const totalBooking = await bookingModel.aggregate([
+            {
+                $match: {
+                    turf: {
+                        $in: groundId,
+                    },
+                },
+            },
+        ]);
+        for (let i = 0; i < totalBooking.length; i++) {
+            if (totalBooking[i].client) userId.push(totalBooking[i].client);
+        }
+
+        let uniqueObjectIds = userId.filter((value, index, self) => {
+            return self.findIndex((objId) => objId.toString() === value.toString()) === index;
+        });
+
+        const totalProfit = await bookingModel.aggregate([
+            {
+                $match: {
+                    turf: {
+                        $in: groundId,
+                    },
+                    payment: "Confirm",
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalPrice: { $sum: "$total" },
+                },
+            },
+        ]);
+
+        const pieChart = await bookingModel.aggregate([
+            {
+                $match: {
+                    turf: {
+                        $in: groundId,
+                    },
+                    status: { $in: ["Confirm", "Pending", "Cancelled"] },
+                },
+            },
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+        console.log(pieChart, "line 677");
+
+        let saleReport;
+
+        saleReport = await bookingModel.aggregate([
+            { $match: { $and: [{ turf: { $in: groundId } }] } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%m", date: "$createdAt" } },
+                    totalPrice: { $sum: "$total" },
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+        saleReport = saleReport.map((el) => {
+            const newOne = { ...el };
+            let id = newOne._id.slice(0, 2);
+            if (id < 10) {
+                id = newOne._id.slice(1, 2);
+            }
+            newOne._id = months[id - 1];
+
+            return newOne;
+        });
+
+        res.status(201).json({
+            barGraph: saleReport,
+            totalBooking: totalBooking,
+            totalProfit: totalProfit,
+            totalCustomer: uniqueObjectIds,
+            pieChart: pieChart,
+        });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ error: "Internal Server Error !" });
     }
 };
