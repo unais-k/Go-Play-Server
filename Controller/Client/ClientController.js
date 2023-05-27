@@ -427,12 +427,13 @@ export const EventSubmitResApi = async (req, res, next) => {
         const formattedDate = date.toISOString().split("T")[0];
 
         const { bookingData } = req.body;
-
+        const advance = parseInt(req.body.advance);
+        const total = parseInt(req.body.total);
         const booking = await OfferModel.create({
             client: req.user.id,
-            total: req.body.total,
+            total: total,
             paymentId: req.body.bookingId,
-            advance: req.body.advance,
+            advance: advance,
             bookDate: formattedDate,
             sport: bookingData[0].sport,
             event: bookingData[0].eventId,
@@ -451,9 +452,9 @@ export const EventSubmitResApi = async (req, res, next) => {
                 const formattedDate = date.toISOString().split("T")[0];
                 const book = await bookingModel.create({
                     client: req.user.id,
-                    total: req.body.total / 7,
+                    total: total / 7,
                     paymentId: req.body.bookingId,
-                    advance: req.body.advance,
+                    advance: advance,
                     bookDate: formattedDate,
                     bookingType: "Online",
                     offerId: booking._id,
@@ -473,9 +474,9 @@ export const EventSubmitResApi = async (req, res, next) => {
                 const formattedDate = date.toISOString().split("T")[0];
                 const book = await bookingModel.create({
                     client: req.user.id,
-                    total: req.body.total / 30,
+                    total: total / 30,
                     paymentId: req.body.bookingId,
-                    advance: req.body.advance,
+                    advance: advance,
                     bookDate: formattedDate,
                     offer: true,
                     offerId: booking._id,

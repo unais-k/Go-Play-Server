@@ -36,7 +36,6 @@ const bookingSchema = new mongoose.Schema(
         payment: { type: String },
         advance: { type: Number },
         sport: { type: String },
-        advance: { type: String },
         total: { type: Number },
         name: { type: String },
         bookingType: { type: String },
