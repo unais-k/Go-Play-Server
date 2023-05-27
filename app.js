@@ -27,6 +27,7 @@ app.use(
             "https://go-play.onrender.com",
             "https://main.d1uqkvwdc75cn6.amplifyapp.com",
             "https://stupendous-kheer-7b5057.netlify.app",
+            "https://go-play-online.netlify.app",
         ],
     })
 );
