@@ -22,7 +22,12 @@ app.use(express.json({ limit: "30mb", extended: true }));
 app.use(morgan("dev"));
 app.use(
     cors({
-        origin: ["http://localhost:3000", "https://go-play.onrender.com", "https://main.d1uqkvwdc75cn6.amplifyapp.com","https://stupendous-kheer-7b5057.netlify.app/"],
+        origin: [
+            "http://localhost:3000",
+            "https://go-play.onrender.com",
+            "https://main.d1uqkvwdc75cn6.amplifyapp.com",
+            "https://stupendous-kheer-7b5057.netlify.app",
+        ],
     })
 );
 app.use(helmet({ crossOriginResourcePolicy: true }));
