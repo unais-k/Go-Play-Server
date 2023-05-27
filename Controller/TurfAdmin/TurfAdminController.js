@@ -350,14 +350,13 @@ export const AddPhotoOnGroundPostApi = async (req, res, next) => {
 
 export const BookingListResApi = async (req, res, next) => {
     try {
-        const groundArray = [];
         const id = req.user.id;
         let groundId = [];
         const find = await GroundModel.find({ Owner: id });
         for (let i = 0; i < find.length; i++) {
             groundId.push(find[i]._id);
         }
-        let AllBooking = [];
+
         const inBook = await bookingModel
             .aggregate([
                 {
@@ -368,7 +367,7 @@ export const BookingListResApi = async (req, res, next) => {
                     },
                 },
             ])
-            .sort({ _id: -1 });
+            .sort({ bookDate: 1 });
         await bookingModel.populate(inBook, {
             path: "turf",
         });
@@ -378,7 +377,6 @@ export const BookingListResApi = async (req, res, next) => {
         await bookingModel.populate(inBook, {
             path: "client",
         });
-        console.log(inBook);
 
         res.status(201).json({ result: inBook });
     } catch (error) {
@@ -389,14 +387,26 @@ export const BookingListResApi = async (req, res, next) => {
 
 export const PaymentStatusSetResApi = async (req, res, next) => {
     try {
-        console.log(req.body);
-        const find = await bookingModel
-            .findOneAndUpdate({ _id: req.body.id }, { $set: { payment: req.body.value, status: req.body.value } })
-            .populate("turf")
-            .populate("event")
-            .populate("client");
+        if (req.body == "Cancelled") {
+            const find = await bookingModel
+                .findOneAndUpdate(
+                    { _id: req.body.id },
+                    { $set: { payment: req.body.value, bookingStatus: true, status: req.body.value } }
+                )
+                .populate("turf")
+                .populate("event")
+                .populate("client");
 
-        res.status(201).json({ result: find });
+            res.status(201).json({ result: find });
+        } else {
+            const find = await bookingModel
+                .findOneAndUpdate({ _id: req.body.id }, { $set: { payment: req.body.value, status: req.body.value } })
+                .populate("turf")
+                .populate("event")
+                .populate("client");
+
+            res.status(201).json({ result: find });
+        }
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message });
@@ -405,13 +415,26 @@ export const PaymentStatusSetResApi = async (req, res, next) => {
 
 export const BookingStatusSetResApi = async (req, res, next) => {
     try {
-        const find = await bookingModel
-            .findOneAndUpdate({ _id: req.body.id }, { $set: { status: req.body.value } })
-            .populate("turf")
-            .populate("event")
-            .populate("client");
+        if (req.body == "Cancelled") {
+            const find = await bookingModel
+                .findOneAndUpdate(
+                    { _id: req.body.id },
+                    { $set: { payment: req.body.value, bookingStatus: true, status: req.body.value } }
+                )
+                .populate("turf")
+                .populate("event")
+                .populate("client");
 
-        res.status(201).json({ result: find });
+            res.status(201).json({ result: find });
+        } else {
+            const find = await bookingModel
+                .findOneAndUpdate({ _id: req.body.id }, { $set: { payment: req.body.value, status: req.body.value } })
+                .populate("turf")
+                .populate("event")
+                .populate("client");
+
+            res.status(201).json({ result: find });
+        }
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message });

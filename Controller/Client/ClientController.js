@@ -149,7 +149,7 @@ export const OnDateBookedResApi = async (req, res, next) => {
         const date = new Date(req.query.date);
         const isoDate = date.toISOString().split("T")[0];
         const selectedTime = [];
-        const find = await bookingModel.find({ event: req.query.id, bookDate: isoDate });
+        const find = await bookingModel.find({ event: req.query.id, bookDate: isoDate, bookingStatus: true });
 
         for (let i = 0; i < find.length; i++) {
             selectedTime.push(find[i].time);
