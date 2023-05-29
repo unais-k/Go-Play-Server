@@ -11,7 +11,9 @@ import notificationModel from "./../../Model/Notification.js";
 import bookingModel from "../../Model/Booking.js";
 import OfferModel from "../../Model/Offer.js";
 import moment from "moment";
-import mongoose from "mongoose";
+import BannerModel from "./../../Model/Banner.js";
+4;
+import { cloudinary } from "../../Utils/Cloudinary.js";
 
 export const adminLogin = async (req, res) => {
     try {
@@ -377,6 +379,40 @@ export const barGraph = async (req, res, next) => {
             pieChart: pieChart,
         });
     } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ error: "Internal Server Error !" });
+    }
+};
+
+export const AddBanner = async (req, res, next) => {
+    try {
+        const { title, photo } = req.body;
+        const Profile = "profile";
+        const result = await cloudinary.uploader
+            .upload(photo, {
+                folder: Profile,
+            })
+            .catch((err) => {
+                console.log(err.message);
+                console.log(err);
+            });
+        const add = await BannerModel.create({
+            title,
+            photo: result.secure_url,
+        });
+        console.log(add);
+        res.status(201).json({ msg: "banner created" });
+    } catch (error) {
+        console.log(err.message);
+        res.status(500).json({ error: "Internal Server Error !" });
+    }
+};
+
+export const FetchBannerResApi = async (req, res, next) => {
+    try {
+        const find = await BannerModel.find({});
+        res.status(201).json({ result: find });
+    } catch (error) {
         console.log(err.message);
         res.status(500).json({ error: "Internal Server Error !" });
     }

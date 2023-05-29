@@ -43,6 +43,9 @@ router.patch("/email-check", FPEmailResApi);
 router.patch("/otp-check", FPOtpResApi);
 router.patch("/forget-password-submit", FPSetResApi);
 router.post("/change-password", clientVerifyToken, ChangePasswordResApi);
+
+// auth and details
+
 router.get("/city-list", CityListResApi);
 router.get("/ground-list", GroundListResApi);
 router.get("/football-ground-list", FootballGroundResApi);

@@ -154,7 +154,7 @@ export const OnDateBookedResApi = async (req, res, next) => {
         for (let i = 0; i < find.length; i++) {
             selectedTime.push(find[i].time);
         }
-        const combinedArray = selectedTime.reduce((acc, curr) => acc.concat(curr), []);
+        const combinedArray = await selectedTime.reduce((acc, curr) => acc.concat(curr), []);
         res.status(201).json({ result: find, time: combinedArray });
     } catch (error) {
         console.log(error);
@@ -174,6 +174,7 @@ export const BookingSubmitResApi = async (req, res, next) => {
         const advance = parseInt(req.body.advance);
         const total = parseInt(req.body.total);
         const { bookingData } = req.body;
+        console.log(typeof advance);
         const booking = await bookingModel.create({
             client: req.user.id,
             total: total,
@@ -427,13 +428,12 @@ export const EventSubmitResApi = async (req, res, next) => {
         const formattedDate = date.toISOString().split("T")[0];
 
         const { bookingData } = req.body;
-        const advance = parseInt(req.body.advance);
-        const total = parseInt(req.body.total);
+
         const booking = await OfferModel.create({
             client: req.user.id,
-            total: total,
+            total: req.body.total,
             paymentId: req.body.bookingId,
-            advance: advance,
+            advance: req.body.advance,
             bookDate: formattedDate,
             sport: bookingData[0].sport,
             event: bookingData[0].eventId,
@@ -452,9 +452,9 @@ export const EventSubmitResApi = async (req, res, next) => {
                 const formattedDate = date.toISOString().split("T")[0];
                 const book = await bookingModel.create({
                     client: req.user.id,
-                    total: total / 7,
+                    total: req.body.total / 7,
                     paymentId: req.body.bookingId,
-                    advance: advance,
+                    advance: req.body.advance,
                     bookDate: formattedDate,
                     bookingType: "Online",
                     offerId: booking._id,
@@ -474,9 +474,9 @@ export const EventSubmitResApi = async (req, res, next) => {
                 const formattedDate = date.toISOString().split("T")[0];
                 const book = await bookingModel.create({
                     client: req.user.id,
-                    total: total / 30,
+                    total: req.body.total / 30,
                     paymentId: req.body.bookingId,
-                    advance: advance,
+                    advance: req.body.advance,
                     bookDate: formattedDate,
                     offer: true,
                     offerId: booking._id,

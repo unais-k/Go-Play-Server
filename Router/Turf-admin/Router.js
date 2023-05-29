@@ -1,5 +1,11 @@
 import express from "express";
-import { TurfAdminLogin, TurfAdminRegister } from "../../Controller/TurfAdmin/AuthController.js";
+import {
+    FPEmailResApi,
+    FPOtpResApi,
+    FPSetResApi,
+    TurfAdminLogin,
+    TurfAdminRegister,
+} from "../../Controller/TurfAdmin/AuthController.js";
 import {
     AddEventResApi,
     AddPhotoOnGroundPostApi,
@@ -39,6 +45,9 @@ const router = express.Router();
 
 router.post("/login", TurfAdminLogin);
 router.post("/register", TurfAdminRegister);
+router.patch("/email-check", FPEmailResApi);
+router.patch("/otp-check", FPOtpResApi);
+router.patch("/forget-password-submit", FPSetResApi);
 // auth ----------
 
 router.post("/ground-add", turfAdminVerifyToken, addGroundReq);

@@ -17,6 +17,8 @@ import {
     userListReqApi,
     UserEventBookingDetailFetchResApi,
     barGraph,
+    AddBanner,
+    FetchBannerResApi,
 } from "../../Controller/Admin/adminController.js";
 import { adminVerifyToken } from "../../Middleware/AuthVerify.js";
 const router = express.Router();
@@ -38,5 +40,7 @@ router.get("/event-detail", adminVerifyToken, EventDetailFetchResApi);
 router.get("/fetch-all-booking", adminVerifyToken, FetchAllBookingResApi);
 router.get("/event-booking-detail-view", adminVerifyToken, UserEventBookingDetailFetchResApi);
 router.get("/admin-home-page", adminVerifyToken, barGraph);
+router.post("/add-banner", adminVerifyToken, AddBanner);
+router.get("/fetch-banner", adminVerifyToken, FetchBannerResApi);
 
 export default router;
