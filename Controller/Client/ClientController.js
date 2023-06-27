@@ -164,8 +164,8 @@ export const OnDateBookedResApi = async (req, res, next) => {
 
 export const BookingSubmitResApi = async (req, res, next) => {
     try {
-        const dateString = req.body.date;
         console.log(req.body);
+        const dateString = req.body.date;
         const dateObject = moment.utc(dateString).add(1, "days");
         const formattedISOString = dateObject.toISOString();
 
